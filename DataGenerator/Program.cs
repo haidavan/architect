@@ -2,7 +2,8 @@
 {
     public static async Task Main()
     {
-        Console.WriteLine("🚀 Запуск системы генерации данных университета");
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.WriteLine("Запуск системы генерации данных университета");
 
         try
         {
@@ -11,11 +12,11 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"💥 Необработанное исключение: {ex.Message}");
+            Console.WriteLine($"Необработанное исключение: {ex.Message}");
         }
         finally
         {
-            Console.WriteLine("🏁 Завершение работы");
+            Console.WriteLine("Завершение работы");
         }
     }
 }

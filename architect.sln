@@ -19,6 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lab3", "lab3\lab3.csproj", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{03431BFB-ACD8-401D-B88A-4CEF13870B6D}"
 	ProjectSection(SolutionItems) = preProject
+		diagram.png = diagram.png
 		docker-compose.yaml = docker-compose.yaml
 		schema.uml = schema.uml
 	EndProjectSection

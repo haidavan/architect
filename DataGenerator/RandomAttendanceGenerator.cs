@@ -288,12 +288,12 @@ public class RandomAttendanceGenerator : IDisposable
             await GenerateStudentsAndAttendance(studentsPerGroup);
 
             await transaction.CommitAsync();
-            Console.WriteLine("✅ Данные успешно сгенерированы");
+            Console.WriteLine("Данные успешно сгенерированы");
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            Console.WriteLine($"❌ Ошибка генерации данных: {ex.Message}");
+            Console.WriteLine($"Ошибка генерации данных: {ex.Message}");
             throw;
         }
     }
