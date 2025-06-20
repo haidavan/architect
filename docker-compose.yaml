@@ -1,0 +1,179 @@
+services:
+  redis:
+    environment:
+      - REDIS_ARGS="--io-threads 4 --save '' --appendonly no --requirepass ''"
+    command: ["redis-server", "--bind", "0.0.0.0", "--loglevel", "warning", "--io-threads", "4", "--save", "", "--appendonly", "no"]
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    restart: unless-stopped
+
+  neo4j:
+    environment:
+      NEO4J_dbms_connector_bolt_tls__level: DISABLED
+      NEO4J_server_default__listen__address: 0.0.0.0
+      NEO4J_server_default__advertised__address: neo4j
+      NEO4J_server_jvm_additional: "-Dfile.encoding=UTF-8"
+      NEO4J_AUTH: neo4j/strongpassword
+      NEO4J_dbms_memory_pagecache_size: 512M
+      NEO4J_dbms_memory_heap_initial__size: 2G
+      NEO4J_dbms_memory_heap_max__size: 2G
+    image: neo4j:5.17-community
+    container_name: neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7474"]
+      interval: 20s
+      timeout: 20s
+      retries: 15
+      start_period: 120s
+    restart: unless-stopped
+
+  elasticsearch:
+    image: elasticsearch:8.13.4
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: postgres_db
+    ports:
+      - "5430:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  kibana:
+    image: kibana:8.13.4
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  lab1:
+    build:
+      context: .
+      dockerfile: lab1/Dockerfile 
+    container_name: lab1
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Postgres=Host=postgres;Port=5432;Database=postgres_db;Username=postgres_user;Password=postgres_password
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  lab2:
+    build:
+      context: .
+      dockerfile: lab2/Dockerfile
+    container_name: lab2
+    ports:
+      - "5002:8080"
+      - "5003:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Redis__ConnectionString=redis:6379
+    depends_on:
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  lab3:
+    build:
+      context: .
+      dockerfile: lab3/Dockerfile
+    container_name: lab3
+    ports:
+      - "5004:8080"
+      - "5005:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Neo4j__Uri=bolt://neo4j:7687
+      - Neo4j__User=neo4j
+      - Neo4j__Password=strongpassword
+    depends_on:
+      neo4j:
+        condition: service_started
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: .
+      dockerfile: GateWay/Dockerfile
+    container_name: gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - Lab1__BaseUrl=http://lab1:8080
+      - Lab2__BaseUrl=http://lab2:8080
+      - Lab3__BaseUrl=http://lab3:8080
+      - Jwt__Key=your_very_very_long_secret_key_here
+      - ASPNETCORE_ENVIRONMENT=Production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      - lab1
+      - lab2
+      - lab3
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  mongodb_data:
+  neo4j_data:
+  elasticsearch_data:
+  postgres_data:

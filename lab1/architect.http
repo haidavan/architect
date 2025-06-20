@@ -1,0 +1,6 @@
+@architect_HostAddress = http://localhost:5233
+
+GET {{architect_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
