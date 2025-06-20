@@ -1,0 +1,100 @@
+@startuml
+' Entities
+class University {
+  +id : SERIAL [PK]
+  name : VARCHAR(100)
+  location : VARCHAR(100)
+}
+
+class Institute {
+  +id : SERIAL [PK]
+  name : VARCHAR(100)
+  university_id : INTEGER [FK]
+}
+
+class Department {
+  +id : SERIAL [PK]
+  name : VARCHAR(100)
+  institute_id : INTEGER [FK]
+}
+
+class Specialty {
+  +id : SERIAL [PK]
+  name : VARCHAR(100)
+  department_id : INTEGER [FK]
+}
+
+class St_group {
+  +id : SERIAL [PK]
+  name : VARCHAR(100)
+  specialty_id : INTEGER [FK]
+}
+
+class Course_of_lecture {
+  +id : SERIAL [PK]
+  name : VARCHAR(100)
+  department_id : INTEGER [FK]
+  specialty_id : INTEGER [FK]
+}
+
+class Lecture {
+  +id : SERIAL [PK]
+  name : VARCHAR(100)
+  course_id : INTEGER [FK]
+}
+
+class Material_of_lecture {
+  +id : SERIAL [PK]
+  name : VARCHAR(100)
+  lecture_id : INTEGER [FK]
+}
+
+class Schedule {
+  +id : SERIAL [PK]
+  date : TIMESTAMP
+  lecture_id : INTEGER [FK]
+  group_id : INTEGER [FK]
+  semester : TEXT (computed)
+}
+
+class Students {
+  +id : SERIAL [PK]
+  name : VARCHAR(100)
+  age : INTEGER
+  mail : VARCHAR(100)
+  group_id : INTEGER [FK]
+}
+
+class Attendance {
+  student_id : INTEGER [PK][FK]
+  schedule_id : INTEGER [PK][FK]
+  attended : BOOLEAN
+  semester : TEXT (computed)
+}
+
+' Relationships
+University "1" -- "*" Institute
+Institute "1" -- "*" Department
+Department "1" -- "*" Specialty
+Specialty "1" -- "*" St_group
+Department "1" -- "*" Course_of_lecture
+Specialty "1" -- "*" Course_of_lecture
+Course_of_lecture "1" -- "*" Lecture
+Lecture "1" -- "*" Material_of_lecture
+Lecture "1" -- "*" Schedule
+St_group "1" -- "*" Schedule
+St_group "1" -- "*" Students
+Schedule "1" -- "*" Attendance
+Students "1" -- "*" Attendance
+
+' Notes
+note top of Material_of_lecture 
+  FK references Lecture(id) despite
+  column name 'course_of_lecture_id'
+end note
+
+note right of Attendance 
+  Partitioned by LIST(semester)
+  Automatic semester calculation
+end note
+@enduml
