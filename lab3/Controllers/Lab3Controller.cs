@@ -1,4 +1,3 @@
-// Controllers/GroupReportController.cs
 using Microsoft.AspNetCore.Mvc;
 using UniversityApi.Models;
 using UniversityApi.Services;
