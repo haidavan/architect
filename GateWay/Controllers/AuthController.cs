@@ -20,7 +20,6 @@ namespace GatewayAPI.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel model)
         {
-            // In production, validate against database
             if (model.Username == "admin" && model.Password == "admin123")
             {
                 var token = GenerateJwtToken(model.Username);

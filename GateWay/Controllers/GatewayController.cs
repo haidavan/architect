@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging; // Добавьте это
+using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -14,16 +14,16 @@ namespace GatewayAPI.Controllers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _config;
-        private readonly ILogger<GatewayController> _logger; // Добавьте поле
+        private readonly ILogger<GatewayController> _logger; 
 
         public GatewayController(
             IHttpClientFactory httpClientFactory,
             IConfiguration config,
-            ILogger<GatewayController> logger) // Добавьте параметр
+            ILogger<GatewayController> logger) 
         {
             _httpClientFactory = httpClientFactory;
             _config = config;
-            _logger = logger; // Инициализируйте поле
+            _logger = logger; 
         }
 
         [HttpPost("lab1")]
